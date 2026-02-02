@@ -1,39 +1,31 @@
-โครงสร้างโปรเจกต์ React + Vite + TypeScript + TailwindCSS
-=========================================================
+โครงสร้างโปรเจกต์ Thai Tax Pro (โปรแกรมคำนวณภาษี)
+===================================================
 
-1. ไฟล์ Configuration (การตั้งค่า)
--------------------------------
-- package.json:
-  เป็นไฟล์สำคัญที่สุด ระบุรายชื่อ Library ที่โปรเจกต์ต้องใช้ (เช่น React, Tailwind) และคำสั่งต่างๆ (Scripts) เช่น 'npm run dev'
+ไฟล์และโฟลเดอร์หลัก
+-------------------
 
-- tsconfig.json และ tsconfig.node.json:
-  ไฟล์ตั้งค่าของ TypeScript เพื่อกำหนดกฎเกณฑ์ในการเขียนโค้ด ให้มีความปลอดภัยและถูกต้องตามมาตรฐาน
+1. /src (Source Code หลัก)
+   - App.tsx           : **หัวใจของโปรแกรม** รวมโค้ดหน้าเว็บทั้งหมด
+                         - ส่วนคำนวณภาษี (Logic สูตรภาษีขั้นบันได 0-35%)
+                         - ส่วนแสดงผล (UI) ทั้ง 3 หน้า (เครื่องคิดเลข, ตารางภาษี, ความรู้)
+                         - การจัดการ Tab เปลี่ยนหน้า
+   - main.tsx          : จุดเริ่มต้นของ React ทำหน้าที่เอา App.tsx ไปแปะลงในหน้าเว็บ
+   - index.css         : ไฟล์ตกแต่งหลัก (CSS) ตั้งค่า Font และการ Reset ค่าต่างๆ ของ Tailwind
 
-- vite.config.ts:
-  ไฟล์ตั้งค่าของ Vite (เครื่องมือที่ใช้รันโปรเจกต์) ใช้กำหนด Plugin ต่างๆ (เช่น React plugin)
+2. Config Files (ไฟล์ตั้งค่าระบบ)
+   - index.html        : หน้าแรกสุดของเว็บ (HTML) ใช้ใส่ชื่อเว็บ (Title), โลโก้, และดึง Font จาก Google
+   - tailwind.config.js: **ตัวคุมธีม** กำหนดสีหลัก (Primary Blue), ฟอนต์ (Prompt), และค่า Breakpoints ต่างๆ
+   - package.json      : รายชื่อ "ส่วนผสม" (Dependencies) ทั้งหมดที่โปรเจกต์ต้องใช้ (เช่น React, Lucide-Icons)
+   - vite.config.ts    : การตั้งค่าเครื่องมือ Vite (ตัวรัน Server)
+   - tsconfig.json     : กฎกติกาการเขียน TypeScript
 
-- tailwind.config.js และ postcss.config.js:
-  ไฟล์ตั้งค่าของ TailwindCSS สำหรับปรับแต่ง Design System, สี, และการจัดการ CSS
+3. อื่นๆ
+   - /public           : เก็บรูปภาพหรือไฟล์นิ่งๆ ที่ไม่ต้องผ่านโปรแกรม (เช่น รูป logo)
+   - /node_modules     : (ห้ามแก้ไข) โฟลเดอร์เก็บไลบรารีที่โหลดมาจาก npm
+   - .gitignore        : รายชื่อไฟล์ที่จะ *ไม่* เอาขึ้น GitHub
 
-2. ไฟล์ Source Code (src/)
------------------------
-- src/main.tsx:
-  จุดเริ่มต้นการทำงานของ React (Entry point) ทำหน้าที่นำ App ไปแสดงผลที่หน้าเว็บ (index.html)
-
-- src/App.tsx:
-  หน้าจอหลักของโปรแกรม (Dashboard UI)
-  - ประกอบด้วยส่วนแสดงรายรับ-รายจ่าย (Cards)
-  - รายการธุรกรรมล่าสุด (Transaction List)
-  - ฟอร์มเพิ่มรายการใหม่ (Add Transaction Modal)
-  - เมนู Sidebar
-
-- src/index.css:
-  ไฟล์ CSS หลักของโปรเจกต์ ซึ่งมีการเรียกใช้ TailwindCSS directives เพื่อให้สามารถใช้ Class ของ Tailwind ได้ทั่วทั้งโปรเจกต์
-
-- src/vite-env.d.ts:
-  ไฟล์ประกาศ Type เพื่อให้ TypeScript เข้าใจการทำงานของ Vite
-
-3. ไฟล์อื่นๆ
-----------
-- index.html:
-  ไฟล์ HTML หลักของหน้าเว็บ เป็นที่อยู่ของ <div id="root"></div> ซึ่ง React จะนำเนื้อหามาแสดงผลที่นี่
+วิธีแก้ไขเบื้องต้น
+-------------------
+- แก้สูตรภาษี/เพิ่มลดหย่อน  -> ไปที่ src/App.tsx (ฟังก์ชัน calculateTax)
+- แก้สี/เปลี่ยนธีม         -> ไปที่ tailwind.config.js
+- เปลี่ยนชื่อเว็บ/รูปไอคอน   -> ไปที่ index.html
