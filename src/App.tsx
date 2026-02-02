@@ -1,0 +1,296 @@
+import React, { useState, useEffect } from 'react';
+import { Calculator, Save, RefreshCw, Info, CheckCircle, PieChart, TrendingUp, DollarSign } from 'lucide-react';
+
+interface TaxBracket {
+    min: number;
+    max: number;
+    rate: number;
+}
+
+const TAX_BRACKETS: TaxBracket[] = [
+    { min: 0, max: 150000, rate: 0 },
+    { min: 150001, max: 300000, rate: 0.05 },
+    { min: 300001, max: 500000, rate: 0.10 },
+    { min: 500001, max: 750000, rate: 0.15 },
+    { min: 750001, max: 1000000, rate: 0.20 },
+    { min: 1000001, max: 2000000, rate: 0.25 },
+    { min: 2000001, max: 5000000, rate: 0.30 },
+    { min: 5000001, max: Infinity, rate: 0.35 },
+];
+
+function App() {
+    // Income
+    const [salary, setSalary] = useState<number>(0);
+    const [bonus, setBonus] = useState<number>(0);
+    const [otherIncome, setOtherIncome] = useState<number>(0);
+
+    // Deductions
+    const [socialSecurity, setSocialSecurity] = useState<number>(9000); // Default max calculation often caps at 9000/yr? usually 750*12 = 9000
+    const [providentFund, setProvidentFund] = useState<number>(0);
+    const [lifeInsurance, setLifeInsurance] = useState<number>(0);
+    const [otherDeductions, setOtherDeductions] = useState<number>(60000); // Personal deduction standard 60k
+
+    // Results
+    const [totalIncome, setTotalIncome] = useState(0);
+    const [totalDeductions, setTotalDeductions] = useState(0);
+    const [netIncome, setNetIncome] = useState(0);
+    const [taxPayable, setTaxPayable] = useState(0);
+    const [taxBracketsData, setTaxBracketsData] = useState<{ bracket: string, amount: number }[]>([]);
+
+    useEffect(() => {
+        calculateTax();
+    }, [salary, bonus, otherIncome, socialSecurity, providentFund, lifeInsurance, otherDeductions]);
+
+    const calculateTax = () => {
+        // 1. Total Income
+        const income = (salary * 12) + bonus + otherIncome;
+        setTotalIncome(income);
+
+        // 2. Expenses (Standard Deduction: 50% but max 100,000)
+        const expenses = Math.min(income * 0.5, 100000);
+
+        // 3. Total Deductions
+        const deductions = expenses + socialSecurity + providentFund + lifeInsurance + otherDeductions;
+        setTotalDeductions(deductions);
+
+        // 4. Net Income
+        const net = Math.max(income - deductions, 0);
+        setNetIncome(net);
+
+        // 5. Calculate Tax Step-by-Step
+        let remainingIncome = net;
+        let tax = 0;
+        const breakdown = [];
+
+        for (const bracket of TAX_BRACKETS) {
+            if (remainingIncome <= 0) break;
+
+            const taxableInThisBracket = Math.min(
+                Math.max(0, net - bracket.min + 1), // Amount above min
+                bracket.max - bracket.min + 1 // Max width of bracket
+            );
+
+            // Correct logic for step calculation
+            // Actually simpler: iterate ranges
+            // If net > bracket.min
+        }
+
+        // Simpler Calculation Loop
+        let calculatedTax = 0;
+        const details = [];
+
+        let incomeForCalc = net;
+
+        // We calculate based on the full Net Income against Brackets
+        for (let i = 0; i < TAX_BRACKETS.length; i++) {
+            const b = TAX_BRACKETS[i];
+            const nextB = TAX_BRACKETS[i + 1];
+            const maxInBracket = (b.max === Infinity ? Infinity : b.max) - b.min + (b.min === 0 ? 0 : 1);
+            // Range 0-150k is 150,000. Range 150001-300000 is 150,000.
+
+            // Wait, standard logic:
+            // 0 - 150,000 (150k) -> 0%
+            // 150,001 - 300,000 (150k) -> 5%
+            // etc.
+
+            // Let's use simple logic
+            const prevMax = b.min === 0 ? 0 : b.min - 1;
+            const currentMax = b.max;
+
+            if (net > prevMax) {
+                const taxableAmount = Math.min(net, currentMax) - prevMax;
+                const taxInBracket = taxableAmount * b.rate;
+                calculatedTax += taxInBracket;
+
+                if (taxInBracket > 0) {
+                    details.push({
+                        bracket: `${b.min.toLocaleString()} - ${b.max === Infinity ? 'MAX' : b.max.toLocaleString()}`,
+                        rate: b.rate * 100,
+                        tax: taxInBracket
+                    });
+                }
+            }
+        }
+
+        setTaxPayable(calculatedTax);
+    };
+
+    const formatMoney = (amount: number) => {
+        return amount.toLocaleString('th-TH', { style: 'currency', currency: 'THB' });
+    };
+
+    return (
+        <div className="min-h-screen bg-slate-50 pb-20 font-sans">
+            {/* Header */}
+            <header className="bg-primary-900 text-white shadow-lg">
+                <div className="container mx-auto px-6 py-6 flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-white/10 rounded-lg">
+                            <Calculator className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold">Thai Tax Pro</h1>
+                            <p className="text-xs text-slate-300">โปรแกรมคำนวณภาษีเงินได้บุคคลธรรมดา</p>
+                        </div>
+                    </div>
+                    <button className="text-sm font-medium hover:text-primary-100 transition-colors flex items-center gap-2">
+                        <Info className="w-4 h-4" /> เกณฑ์ภาษี 2567
+                    </button>
+                </div>
+            </header>
+
+            <main className="container mx-auto px-4 py-8 grid lg:grid-cols-3 gap-8">
+
+                {/* Left Column: Inputs */}
+                <div className="lg:col-span-2 space-y-6">
+
+                    {/* Income Section */}
+                    <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-50">
+                            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-primary-600">
+                                <DollarSign className="w-5 h-5" />
+                            </div>
+                            <h2 className="text-lg font-bold text-slate-800">1. รายได้ (Income)</h2>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-600 mb-2">เงินเดือน (ต่อเดือน)</label>
+                                <input
+                                    type="number"
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all font-semibold text-slate-800"
+                                    placeholder="0"
+                                    value={salary || ''}
+                                    onChange={e => setSalary(Number(e.target.value))}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-600 mb-2">โบนัส (ทั้งปี)</label>
+                                <input
+                                    type="number"
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all font-semibold text-slate-800"
+                                    placeholder="0"
+                                    value={bonus || ''}
+                                    onChange={e => setBonus(Number(e.target.value))}
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-slate-600 mb-2">รายได้อื่นๆ (ทั้งปี)</label>
+                                <input
+                                    type="number"
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all font-semibold text-slate-800"
+                                    placeholder="0"
+                                    value={otherIncome || ''}
+                                    onChange={e => setOtherIncome(Number(e.target.value))}
+                                />
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Deductions Section */}
+                    <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-50">
+                            <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                                <TrendingUp className="w-5 h-5" />
+                            </div>
+                            <h2 className="text-lg font-bold text-slate-800">2. ค่าลดหย่อน (Deductions)</h2>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-600 mb-2">ประกันสังคม (ทั้งปี)</label>
+                                <input
+                                    type="number"
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-semibold text-slate-800"
+                                    value={socialSecurity}
+                                    onChange={e => setSocialSecurity(Number(e.target.value))}
+                                />
+                                <p className="text-xs text-slate-400 mt-1">*ปกติสูงสุด 9,000 บาท</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-600 mb-2">ค่าลดหย่อนส่วนตัว</label>
+                                <input
+                                    type="number"
+                                    disabled
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 font-semibold"
+                                    value={60000}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-600 mb-2">กองทุนสำรองเลี้ยงชีพ (PVD)</label>
+                                <input
+                                    type="number"
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-semibold text-slate-800"
+                                    value={providentFund || ''}
+                                    onChange={e => setProvidentFund(Number(e.target.value))}
+                                    placeholder="0"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-600 mb-2">เบี้ยประกันชีวิต</label>
+                                <input
+                                    type="number"
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-semibold text-slate-800"
+                                    value={lifeInsurance || ''}
+                                    onChange={e => setLifeInsurance(Number(e.target.value))}
+                                    placeholder="สูงสุด 100,000"
+                                />
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                {/* Right Column: Summary Card (Sticky) */}
+                <div className="lg:col-span-1">
+                    <div className="bg-white rounded-2xl shadow-xl shadow-slate-200 border border-slate-100 p-6 sticky top-8">
+                        <div className="text-center mb-6">
+                            <p className="text-slate-500 font-medium mb-1">ภาษีที่ต้องจ่าย (Tax Payable)</p>
+                            <h2 className="text-4xl font-bold text-primary-600">{formatMoney(taxPayable)}</h2>
+                            <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-sm font-bold">
+                                <CheckCircle className="w-4 h-4" />
+                                อัตราเฉลี่ย: {totalIncome > 0 ? ((taxPayable / totalIncome) * 100).toFixed(2) : 0}%
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 border-t border-slate-100 pt-6 text-sm">
+                            <div className="flex justify-between items-center text-slate-600">
+                                <span>รายได้รวมทั้งปี</span>
+                                <span className="font-semibold text-slate-900">{formatMoney(totalIncome)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-slate-600">
+                                <span>หักค่าใช้จ่าย (50%)</span>
+                                <span className="font-semibold text-emerald-600">-{formatMoney(Math.min(totalIncome * 0.5, 100000))}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-slate-600">
+                                <span>หักค่าลดหย่อนรวม</span>
+                                <span className="font-semibold text-emerald-600">-{formatMoney(totalDeductions - Math.min(totalIncome * 0.5, 100000))}</span>
+                            </div>
+                            <div className="flex justify-between items-center pt-4 border-t border-slate-100">
+                                <span className="font-bold text-slate-800">เงินได้สุทธิ (Net Income)</span>
+                                <span className="font-bold text-primary-700 text-lg">{formatMoney(netIncome)}</span>
+                            </div>
+                        </div>
+
+                        <button className="w-full mt-8 bg-primary-600 hover:bg-primary-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary-500/30 transition-all flex items-center justify-center gap-2">
+                            <Save className="w-5 h-5" />
+                            บันทึกผลการคำนวณ
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                setSalary(0); setBonus(0); setOtherIncome(0); setProvidentFund(0); setLifeInsurance(0);
+                            }}
+                            className="w-full mt-3 bg-white hover:bg-slate-50 text-slate-600 font-bold py-3 rounded-xl border border-slate-200 transition-all flex items-center justify-center gap-2"
+                        >
+                            <RefreshCw className="w-4 h-4" />
+                            เริ่มใหม่
+                        </button>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    );
+}
+
+export default App;

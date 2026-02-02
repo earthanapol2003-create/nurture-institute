@@ -1,0 +1,39 @@
+โครงสร้างโปรเจกต์ React + Vite + TypeScript + TailwindCSS
+=========================================================
+
+1. ไฟล์ Configuration (การตั้งค่า)
+-------------------------------
+- package.json:
+  เป็นไฟล์สำคัญที่สุด ระบุรายชื่อ Library ที่โปรเจกต์ต้องใช้ (เช่น React, Tailwind) และคำสั่งต่างๆ (Scripts) เช่น 'npm run dev'
+
+- tsconfig.json และ tsconfig.node.json:
+  ไฟล์ตั้งค่าของ TypeScript เพื่อกำหนดกฎเกณฑ์ในการเขียนโค้ด ให้มีความปลอดภัยและถูกต้องตามมาตรฐาน
+
+- vite.config.ts:
+  ไฟล์ตั้งค่าของ Vite (เครื่องมือที่ใช้รันโปรเจกต์) ใช้กำหนด Plugin ต่างๆ (เช่น React plugin)
+
+- tailwind.config.js และ postcss.config.js:
+  ไฟล์ตั้งค่าของ TailwindCSS สำหรับปรับแต่ง Design System, สี, และการจัดการ CSS
+
+2. ไฟล์ Source Code (src/)
+-----------------------
+- src/main.tsx:
+  จุดเริ่มต้นการทำงานของ React (Entry point) ทำหน้าที่นำ App ไปแสดงผลที่หน้าเว็บ (index.html)
+
+- src/App.tsx:
+  หน้าจอหลักของโปรแกรม (Dashboard UI)
+  - ประกอบด้วยส่วนแสดงรายรับ-รายจ่าย (Cards)
+  - รายการธุรกรรมล่าสุด (Transaction List)
+  - ฟอร์มเพิ่มรายการใหม่ (Add Transaction Modal)
+  - เมนู Sidebar
+
+- src/index.css:
+  ไฟล์ CSS หลักของโปรเจกต์ ซึ่งมีการเรียกใช้ TailwindCSS directives เพื่อให้สามารถใช้ Class ของ Tailwind ได้ทั่วทั้งโปรเจกต์
+
+- src/vite-env.d.ts:
+  ไฟล์ประกาศ Type เพื่อให้ TypeScript เข้าใจการทำงานของ Vite
+
+3. ไฟล์อื่นๆ
+----------
+- index.html:
+  ไฟล์ HTML หลักของหน้าเว็บ เป็นที่อยู่ของ <div id="root"></div> ซึ่ง React จะนำเนื้อหามาแสดงผลที่นี่
