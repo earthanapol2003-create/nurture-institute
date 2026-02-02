@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Calculator, Save, RefreshCw, Info, CheckCircle, PieChart, TrendingUp, DollarSign } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Calculator, Save, RefreshCw, Info, CheckCircle, TrendingUp, DollarSign } from 'lucide-react';
 
 interface TaxBracket {
     min: number;
@@ -25,17 +25,16 @@ function App() {
     const [otherIncome, setOtherIncome] = useState<number>(0);
 
     // Deductions
-    const [socialSecurity, setSocialSecurity] = useState<number>(9000); // Default max calculation often caps at 9000/yr? usually 750*12 = 9000
+    const [socialSecurity, setSocialSecurity] = useState<number>(9000);
     const [providentFund, setProvidentFund] = useState<number>(0);
     const [lifeInsurance, setLifeInsurance] = useState<number>(0);
-    const [otherDeductions, setOtherDeductions] = useState<number>(60000); // Personal deduction standard 60k
+    const [otherDeductions] = useState<number>(60000); // Personal deduction standard 60k
 
     // Results
     const [totalIncome, setTotalIncome] = useState(0);
     const [totalDeductions, setTotalDeductions] = useState(0);
     const [netIncome, setNetIncome] = useState(0);
     const [taxPayable, setTaxPayable] = useState(0);
-    const [taxBracketsData, setTaxBracketsData] = useState<{ bracket: string, amount: number }[]>([]);
 
     useEffect(() => {
         calculateTax();
@@ -57,43 +56,17 @@ function App() {
         const net = Math.max(income - deductions, 0);
         setNetIncome(net);
 
-        // 5. Calculate Tax Step-by-Step
-        let remainingIncome = net;
-        let tax = 0;
-        const breakdown = [];
-
-        for (const bracket of TAX_BRACKETS) {
-            if (remainingIncome <= 0) break;
-
-            const taxableInThisBracket = Math.min(
-                Math.max(0, net - bracket.min + 1), // Amount above min
-                bracket.max - bracket.min + 1 // Max width of bracket
-            );
-
-            // Correct logic for step calculation
-            // Actually simpler: iterate ranges
-            // If net > bracket.min
-        }
-
-        // Simpler Calculation Loop
+        // 5. Calculate Tax
         let calculatedTax = 0;
-        const details = [];
-
-        let incomeForCalc = net;
 
         // We calculate based on the full Net Income against Brackets
         for (let i = 0; i < TAX_BRACKETS.length; i++) {
             const b = TAX_BRACKETS[i];
-            const nextB = TAX_BRACKETS[i + 1];
-            const maxInBracket = (b.max === Infinity ? Infinity : b.max) - b.min + (b.min === 0 ? 0 : 1);
-            // Range 0-150k is 150,000. Range 150001-300000 is 150,000.
 
-            // Wait, standard logic:
-            // 0 - 150,000 (150k) -> 0%
-            // 150,001 - 300,000 (150k) -> 5%
-            // etc.
+            // Logic: 
+            // - If Net Income is greater than the previous bracket's max
+            // - Calculate the amount taxable in the current bracket
 
-            // Let's use simple logic
             const prevMax = b.min === 0 ? 0 : b.min - 1;
             const currentMax = b.max;
 
@@ -101,14 +74,6 @@ function App() {
                 const taxableAmount = Math.min(net, currentMax) - prevMax;
                 const taxInBracket = taxableAmount * b.rate;
                 calculatedTax += taxInBracket;
-
-                if (taxInBracket > 0) {
-                    details.push({
-                        bracket: `${b.min.toLocaleString()} - ${b.max === Infinity ? 'MAX' : b.max.toLocaleString()}`,
-                        rate: b.rate * 100,
-                        tax: taxInBracket
-                    });
-                }
             }
         }
 
